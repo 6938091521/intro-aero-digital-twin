@@ -1,0 +1,226 @@
+import { describe, expect, test } from "vitest";
+
+import {
+  calculateCm,
+  calculateTrimAngleDeg,
+  calculateDeltaCm,
+  classifyDisturbance,
+  isTrimmed,
+  degreesToRadians
+} from "../../src/student/physics/trim-response.js";
+
+const NUMERICAL_TOLERANCE = 1e-10;
+const TRIM_TOLERANCE = 1e-9;
+
+describe("trim-response physics", () => {
+  test("numerical case: matches the completed reference calculation", () => {
+    const cm0 = 0.04;
+    const cmAlphaPerRad = -0.8;
+    const angleOfAttackDeg = 2.86;
+    const disturbanceAlphaDeg = 2.0;
+
+    const alphaRad = degreesToRadians(angleOfAttackDeg);
+    const disturbanceAlphaRad = degreesToRadians(
+      disturbanceAlphaDeg
+    );
+
+    const cm = calculateCm(
+      cm0,
+      cmAlphaPerRad,
+      angleOfAttackDeg
+    );
+
+    const trimAngleDeg = calculateTrimAngleDeg(
+      cm0,
+      cmAlphaPerRad
+    );
+
+    const deltaCm = calculateDeltaCm(
+      cmAlphaPerRad,
+      disturbanceAlphaDeg
+    );
+
+    expect(alphaRad).toBeCloseTo(
+      0.04991641661,
+      10
+    );
+
+    expect(disturbanceAlphaRad).toBeCloseTo(
+      0.03490658504,
+      10
+    );
+
+    expect(cm).toBeCloseTo(
+      6.6866712e-5,
+      10
+    );
+
+    expect(trimAngleDeg).toBeCloseTo(
+      -2.864788975654116,
+      9
+    );
+
+    expect(deltaCm).toBeCloseTo(
+      -0.027925268031909273,
+      10
+    );
+
+    expect(isTrimmed(cm)).toBe(true);
+
+    expect(
+      classifyDisturbance(
+        disturbanceAlphaDeg,
+        deltaCm
+      )
+    ).toBe("restoring");
+  });
+
+  test("behavioral case: increasing Cm0 changes trim while disturbance response stays fixed", () => {
+    const originalCm0 = 0.04;
+    const changedCm0 = 0.08;
+    const cmAlphaPerRad = -0.8;
+    const angleOfAttackDeg = 2.86;
+    const disturbanceAlphaDeg = 2.0;
+
+    const originalTrim = calculateTrimAngleDeg(
+      originalCm0,
+      cmAlphaPerRad
+    );
+
+    const changedCm = calculateCm(
+      changedCm0,
+      cmAlphaPerRad,
+      angleOfAttackDeg
+    );
+
+    const changedTrim = calculateTrimAngleDeg(
+      changedCm0,
+      cmAlphaPerRad
+    );
+
+    const changedDeltaCm = calculateDeltaCm(
+      cmAlphaPerRad,
+      disturbanceAlphaDeg
+    );
+
+    expect(changedCm).toBeCloseTo(
+      0.040066866711,
+      10
+    );
+
+    expect(changedTrim).toBeCloseTo(
+      -5.729577951308232,
+      9
+    );
+
+    expect(
+      Math.abs(changedTrim)
+    ).toBeGreaterThan(
+      Math.abs(originalTrim)
+    );
+
+    expect(changedDeltaCm).toBeCloseTo(
+      -0.027925268031909273,
+      10
+    );
+
+    expect(
+      classifyDisturbance(
+        disturbanceAlphaDeg,
+        changedDeltaCm
+      )
+    ).toBe("restoring");
+  });
+
+  test("boundary case: zero disturbance produces zero delta_Cm and neutral tendency", () => {
+    const cmAlphaPerRad = -0.8;
+    const disturbanceAlphaDeg = 0;
+
+    const deltaCm = calculateDeltaCm(
+      cmAlphaPerRad,
+      disturbanceAlphaDeg
+    );
+
+    expect(deltaCm).toBeCloseTo(
+      0,
+      10
+    );
+
+    expect(
+      classifyDisturbance(
+        disturbanceAlphaDeg,
+        deltaCm
+      )
+    ).toBe("neutral");
+  });
+
+  test("boundary case: zero Cm_alpha has no unique trim angle", () => {
+    expect(
+      calculateTrimAngleDeg(0.04, 0)
+    ).toBeNull();
+  });
+
+  test("expected physical behavior: negative slope and positive disturbance gives negative delta_Cm", () => {
+    const deltaCm = calculateDeltaCm(
+      -0.8,
+      2
+    );
+
+    expect(deltaCm).toBeLessThan(0);
+  });
+
+  test("expected physical behavior: positive slope and positive disturbance gives positive delta_Cm", () => {
+    const deltaCm = calculateDeltaCm(
+      0.8,
+      2
+    );
+
+    expect(deltaCm).toBeGreaterThan(0);
+  });
+
+  test("expected physical behavior: zero slope produces zero delta_Cm", () => {
+    const deltaCm = calculateDeltaCm(
+      0,
+      2
+    );
+
+    expect(deltaCm).toBeCloseTo(
+      0,
+      10
+    );
+  });
+
+  test("expected physical behavior: doubling disturbance doubles delta_Cm", () => {
+    const single = calculateDeltaCm(
+      -0.8,
+      2
+    );
+
+    const doubled = calculateDeltaCm(
+      -0.8,
+      4
+    );
+
+    expect(doubled).toBeCloseTo(
+      2 * single,
+      10
+    );
+  });
+
+  test("rejects non-finite engineering inputs", () => {
+    expect(() =>
+      calculateCm(
+        0.04,
+        -0.8,
+        Number.NaN
+      )
+    ).toThrow();
+
+    expect(() =>
+      calculateDeltaCm(
+        Number.POSITIVE_INFINITY,
+        2
+      )
+    ).toThrow();
+  });
+});

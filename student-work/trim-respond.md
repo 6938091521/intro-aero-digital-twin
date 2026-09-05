@@ -1,6 +1,6 @@
 # Stage 4 Starter Specification: Live Cm–Alpha Relationship and Trim
 
-Student name: `[YOUR NAME]`
+Student name: `Napatsnan Chokthanakarnd`
 
 Complete only the boxes marked **STUDENT COMPLETES**. The instructor-provided engineering scope and the implementation contract must not be edited. When the specification is complete and approved, attach this one file to ChatGPT.
 
@@ -99,11 +99,11 @@ Also make the calculated values available through the provided `stability.pitch.
 
 Before asking ChatGPT for code, complete each prediction in your own words.
 
-1. If `Cm_alpha < 0` and the angle-of-attack disturbance is positive, `delta_Cm` should be `[COMPLETE]` because `[COMPLETE]`.
-2. If `Cm_alpha > 0` and the angle-of-attack disturbance is positive, the response should be `[COMPLETE]` because `[COMPLETE]`.
-3. If `Cm_alpha = 0`, changing angle of attack should `[COMPLETE]`.
-4. If `Cm0` is fixed and the magnitude of a nonzero `Cm_alpha` increases, the trim angle magnitude should `[COMPLETE]`.
-5. Doubling `disturbanceAlphaDeg` while holding `Cm_alpha` fixed should `[COMPLETE]`.
+1. If `Cm_alpha < 0` and the angle-of-attack disturbance is positive, `delta_Cm` should be `negative` because `from the equation deltaCm = Cmalpha * delta alpha(angle of attack)it's - * + = -`.
+2. If `Cm_alpha > 0` and the angle-of-attack disturbance is positive, the response should be `possitive` because `[from the equation deltaCm = Cmalpha * delta alpha(angle of attack)it's + * + = +]`.
+3. If `Cm_alpha = 0`, changing angle of attack should `not impact`.
+4. If `Cm0` is fixed and the magnitude of a nonzero `Cm_alpha` increases, the trim angle magnitude should `[decrease]`.
+5. Doubling `disturbanceAlphaDeg` while holding `Cm_alpha` fixed should `[also dobbles the deltaCm]`.
 
 ## 8. Reference Calculation — STUDENT COMPLETES
 
@@ -111,28 +111,28 @@ Use the assigned class values or values approved by your instructor. Show the su
 
 ```text
 Inputs:
-Cm0 = [COMPLETE]
-Cm_alpha = [COMPLETE] 1/rad
-alpha = [COMPLETE] deg
-delta_alpha = [COMPLETE] deg
+Cm0 = 0.04
+Cm_alpha = -0.8 1/rad
+alpha = 2.86 deg
+delta_alpha = +2.00 deg
 
 Angle conversion:
-alpha_rad = [SHOW WORK]
-delta_alpha_rad = [SHOW WORK]
+alpha_rad = 2.86 * pi / 180 = 0.04991641661 rad
+delta_alpha_rad = +2.00 * pi / 180 = 0.03490658504 rad
 
 Current pitching-moment coefficient:
-Cm(alpha) = [SHOW WORK]
+Cm(alpha) = [0.04+(-0.8 * 0.04991641661) = 6.6866712*10^-5 ] 
 
 Trim angle:
-alpha_trim_rad = [SHOW WORK]
-alpha_trim_deg = [SHOW WORK]
+alpha_trim_rad = [0.04/-0.8 = -0.05]
+alpha_trim_deg = [0.04/-0.8 * 180/pi = 8.72664626 * 10^-4]
 
 Disturbance response:
-delta_Cm = [SHOW WORK]
+delta_Cm = [-0.8 * 0.03490658504 = -0.02792526803]
 
 Expected classifications:
-selected condition = [trimmed / not trimmed]
-disturbance tendency = [restoring / neutral / destabilizing]
+selected condition = [trimmed]
+disturbance tendency = [neutral]
 ```
 
 ## 9. Verification Cases — STUDENT COMPLETES
@@ -144,7 +144,25 @@ Define all three cases before implementation. Include exact inputs, expected out
 Use your Section 8 reference calculation.
 
 ```text
-[COMPLETE]
+[Inputs:
+Cm0 = 0.04
+Cm_alpha = -0.8 1/rad
+alpha = 2.86 deg
+delta_alpha = +2.00 deg
+  Angle conversion:
+alpha_rad = 2.86 * pi / 180 = 0.04991641661 rad
+delta_alpha_rad = +2.00 * pi / 180 = 0.03490658504 rad
+
+Current pitching-moment coefficient:
+Cm(alpha) = [0.04+(-0.8 * 0.04991641661) = 6.6866712*10^-5 ] 
+
+Trim angle:
+alpha_trim_rad = [0.04/-0.8 = -0.05]
+alpha_trim_deg = [0.04/-0.8 * 180/pi = 8.72664626 * 10^-4]
+
+Disturbance response:
+delta_Cm = [-0.8 * 0.03490658504 = -0.02792526803]
+]
 ```
 
 ### 9.2 Behavioral case
@@ -152,7 +170,25 @@ Use your Section 8 reference calculation.
 Change one input and state the exact trend or sign that must result.
 
 ```text
-[COMPLETE]
+[
+  Inputs: chage the Cm0 from 0.04 to 0.08
+Cm0 = 0.08
+Cm_alpha = -0.8 1/rad
+alpha = 2.86 deg
+delta_alpha = +2.00 deg
+  Angle conversion:
+alpha_rad = 2.86 * pi / 180 = 0.04991641661 rad
+delta_alpha_rad = +2.00 * pi / 180 = 0.03490658504 rad
+
+Current pitching-moment coefficient:
+Cm(alpha) = [0.08+(-0.8 * 0.04991641661) = 0.04006686671 ] 
+
+Trim angle:
+alpha_trim_rad = [0.08/-0.8 = -0.1]
+alpha_trim_deg = [0.08/-0.8 * 180/pi = -1.745329252 * 10^-3]
+
+Disturbance response:
+delta_Cm = [-0.8 * 0.03490658504 = -0.02792526803]]
 ```
 
 ### 9.3 Boundary or sanity case
@@ -160,7 +196,8 @@ Change one input and state the exact trend or sign that must result.
 Use an informative boundary such as zero slope, zero disturbance, or the trim condition. State the exact behavior expected and why division by zero or a false physical claim must not occur.
 
 ```text
-[COMPLETE]
+[if zero disterbance, it means delta_alpha = 0 rad this make delta_Cm = 0
+and division by zero make the result equal to infinity and it might not exist in the real condition]
 ```
 
 ## 10. Feature Requirements
@@ -196,7 +233,7 @@ Do not modify any existing file.
 In one or two sentences, state what decision the completed feature will support and what it cannot establish.
 
 ```text
-[COMPLETE]
+[The completed feature suppord us to know about the static stability but cannot establish the dynamic stability]
 ```
 
 ---

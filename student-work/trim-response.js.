@@ -1,0 +1,87 @@
+// Stage 4: Live Cm-alpha relationship and trim.
+// Inputs: angles are supplied in degrees; Cm_alpha is per radian.
+// Outputs: Cm and delta_Cm are dimensionless; trim angle is degrees.
+// Sign convention: positive angle of attack and pitching moment are nose-up.
+// Assumption: linear, quasi-static Cm-alpha relationship.
+
+const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
+const TRIM_TOLERANCE = 1e-6;
+
+function requireFiniteNumber(value, name) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new TypeError(`${name} must be a finite number`);
+  }
+  return value;
+}
+
+export function degreesToRadians(degrees) {
+  return requireFiniteNumber(degrees, "degrees") * DEG_TO_RAD;
+}
+
+export function radiansToDegrees(radians) {
+  return requireFiniteNumber(radians, "radians") * RAD_TO_DEG;
+}
+
+export function calculateCm(cm0, cmAlphaPerRad, angleOfAttackDeg) {
+  requireFiniteNumber(cm0, "cm0");
+  requireFiniteNumber(cmAlphaPerRad, "cmAlphaPerRad");
+
+  const alphaRad = degreesToRadians(angleOfAttackDeg);
+  return cm0 + cmAlphaPerRad * alphaRad;
+}
+
+export function calculateTrimAngleRad(cm0, cmAlphaPerRad) {
+  requireFiniteNumber(cm0, "cm0");
+  requireFiniteNumber(cmAlphaPerRad, "cmAlphaPerRad");
+
+  if (cmAlphaPerRad === 0) {
+    return null;
+  }
+
+  return -cm0 / cmAlphaPerRad;
+}
+
+export function calculateTrimAngleDeg(cm0, cmAlphaPerRad) {
+  const trimAngleRad = calculateTrimAngleRad(cm0, cmAlphaPerRad);
+
+  if (trimAngleRad === null) {
+    return null;
+  }
+
+  return radiansToDegrees(trimAngleRad);
+}
+
+export function calculateDeltaCm(cmAlphaPerRad, disturbanceAlphaDeg) {
+  requireFiniteNumber(cmAlphaPerRad, "cmAlphaPerRad");
+
+  const disturbanceAlphaRad = degreesToRadians(disturbanceAlphaDeg);
+  return cmAlphaPerRad * disturbanceAlphaRad;
+}
+
+export function classifyDisturbance(disturbanceAlphaDeg, deltaCm) {
+  requireFiniteNumber(disturbanceAlphaDeg, "disturbanceAlphaDeg");
+  requireFiniteNumber(deltaCm, "deltaCm");
+
+  const disturbanceAlphaRad = degreesToRadians(disturbanceAlphaDeg);
+  const product = disturbanceAlphaRad * deltaCm;
+
+  if (product < 0) {
+    return "restoring";
+  }
+
+  if (product > 0) {
+    return "destabilizing";
+  }
+
+  return "neutral";
+}
+
+export function isTrimmed(cm) {
+  requireFiniteNumber(cm, "cm");
+  return Math.abs(cm) <= TRIM_TOLERANCE;
+}
+
+export function calculateCmAtAngle(cm0, cmAlphaPerRad, angleOfAttackDeg) {
+  return calculateCm(cm0, cmAlphaPerRad, angleOfAttackDeg);
+}
